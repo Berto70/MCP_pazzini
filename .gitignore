@@ -31,5 +31,7 @@ ENV/
 env.bak/
 venv.bak/
 
+# Build folders/files
+/home/jetson/MCP_pazzini/cuda-c/build/*
 
 
