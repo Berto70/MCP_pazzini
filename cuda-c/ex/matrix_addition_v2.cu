@@ -28,34 +28,32 @@ void print_matrix(const float* A, int rows, int cols) {
     }
 }
 
-// Function to generate a random number between 0 and 99
-float random_number() {
-    return (std::rand()*1./RAND_MAX);
-}
-
 int main() {
-    // Seed the random number generator with the current time
-    srand(time(NULL));  // Ensure that rand() produces different sequences each run
-
-    // Local vectors hosted in memory, each with N elements
-    // using a vector to host the matrix, in a row-wise allocation
-    std::vector<float> h_A(ROWS * COLS), h_B(ROWS * COLS), h_C(ROWS * COLS);
-    std::generate(h_A.begin(), h_A.end(), random_number);  // Fill vector 'A' with random number
-    std::generate(h_B.begin(), h_B.end(), random_number);  // Fill vector 'B' with random number
-
+    
     // Size in bytes for the ROWS x COLS matrix
     int size = ROWS * COLS * sizeof(float);  
 
-    float *d_A, *d_B, *d_C;
+    // Host memory allocation
+    float *h_A = (float*)malloc(size);
+    float *h_B = (float*)malloc(size);
+    float *h_C = (float*)malloc(size);
+
+    // Initialize matrices A and B
+    for (int i = 0; i < ROWS * COLS; i++) {
+        h_A[i] = 1.0 + (float)rand()/RAND_MAX;
+        h_B[i] = 2.0 + (float)rand()/RAND_MAX;
+    }
 
     // Device memory allocation
+    float *d_A, *d_B, *d_C;
+
     cudaMalloc((void**)&d_A, size);
     cudaMalloc((void**)&d_B, size);
     cudaMalloc((void**)&d_C, size);
 
     // Copy matrices A and B from host to device
-    cudaMemcpy(d_A, h_A.data(), size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B.data(), size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, size, cudaMemcpyHostToDevice);
 
     // Define block and grid sizes
     int N_tpb = 256;
@@ -65,11 +63,11 @@ int main() {
     matrixAdd<<<N_blocks, N_tpb>>>(d_A, d_B, d_C, ROWS, COLS);
 
     // Copy the result matrix C from device to host
-    cudaMemcpy(h_C.data(), d_C, size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_C, d_C, size, cudaMemcpyDeviceToHost);
 
     // Print part of the result matrix C for verification
     printf("Matrix C\n");
-    print_matrix(h_C.data(), 10, 10);
+    print_matrix(h_C, 10, 10);
 
     // Free device memory
     cudaFree(d_A);
