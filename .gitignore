@@ -32,8 +32,8 @@ env.bak/
 venv.bak/
 
 # Build folders/files
-/home/jetson/MCP_pazzini/cuda-c/build/
-/home/jetson/MCP_pazzini/cuda-c/ex/build/
+cuda-c/build/
+cuda-c/ex/build/
 
 # VSCode
-/home/jetson/MCP_pazzini/.vscode
+.vscode/
